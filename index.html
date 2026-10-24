@@ -1,0 +1,88 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TinyWins ✨</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f8f5ff;color:#30284b;padding:20px}
+main{max-width:650px;margin:auto}
+header{background:#8d75df;color:white;padding:25px;border-radius:24px}
+h1{margin:0 0 8px;font-size:32px}
+.card{background:white;padding:20px;border-radius:18px;margin-top:16px;box-shadow:0 4px 18px #34215a0c}
+.stats{display:flex;gap:12px;margin-top:15px}
+.stat{flex:1;background:#f0ebff;border-radius:14px;padding:13px;text-align:center}
+.stat strong{display:block;font-size:24px}
+input{width:100%;padding:14px;border:1px solid #ddd4f6;border-radius:12px;font-size:16px;margin:8px 0}
+button{border:0;background:#8d75df;color:white;border-radius:12px;padding:12px 16px;font-size:15px;cursor:pointer}
+.quest{display:flex;align-items:center;gap:10px;border-bottom:1px solid #eee8fa;padding:14px 0}
+.quest span{flex:1;overflow-wrap:anywhere}
+.quest.done span{text-decoration:line-through;color:#8d85a0}
+.delete{background:#fce9ef;color:#9c4262;padding:9px}
+.small{color:#786f91;font-size:14px}
+</style>
+</head>
+<body>
+<main>
+<header>
+<h1>✨ TinyWins</h1>
+<p>Little goals. Big progress.</p>
+<p id="date"></p>
+</header>
+<div class="stats">
+<div class="stat"><strong id="stars">0 ⭐</strong>Stars earned</div>
+<div class="stat"><strong id="progress">0%</strong>Completed</div>
+</div>
+<section class="card">
+<h2>🌷 Today's quests</h2>
+<p class="small">Every little step counts.</p>
+<form id="form">
+<input id="task" placeholder="Write a tiny goal..." maxlength="100" required>
+<button type="submit">+ Add quest</button>
+</form>
+<div id="quests"></div>
+</section>
+<section class="card">
+<h3>💜 Keep going!</h3>
+<p id="message">Your next little win is waiting.</p>
+</section>
+</main>
+<script>
+const key="tinywins-quests-v1";
+let quests=[];
+try{quests=JSON.parse(localStorage.getItem(key)||"[]")}catch(e){quests=[]}
+document.getElementById("date").textContent=new Date().toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"});
+function save(){try{localStorage.setItem(key,JSON.stringify(quests))}catch(e){} render()}
+function render(){
+const list=document.getElementById("quests");
+list.innerHTML="";
+quests.forEach((q,i)=>{
+const row=document.createElement("div");
+row.className="quest"+(q.done?" done":"");
+const check=document.createElement("input");
+check.type="checkbox";check.checked=q.done;check.style.width="22px";check.style.margin="0";
+check.setAttribute("aria-label","Complete "+q.text);
+check.onchange=()=>{q.done=check.checked;save()};
+const label=document.createElement("span");label.textContent=q.text;
+const del=document.createElement("button");del.className="delete";del.textContent="✕";del.setAttribute("aria-label","Delete quest");
+del.onclick=()=>{quests.splice(i,1);save()};
+row.append(check,label,del);list.append(row);
+});
+const done=quests.filter(q=>q.done).length;
+document.getElementById("stars").textContent=done+" ⭐";
+document.getElementById("progress").textContent=(quests.length?Math.round(done/quests.length*100):0)+"%";
+document.getElementById("message").textContent=quests.length&&done===quests.length?"Amazing! You completed every quest! 🎉":"One small step is still progress. 💜";
+}
+document.getElementById("form").onsubmit=e=>{
+e.preventDefault();const input=document.getElementById("task");
+const text=input.value.trim();if(!text)return;
+quests.push({text,done:false});input.value="";save();
+};
+if(!quests.length)quests=[{text:"Drink a glass of water",done:false},{text:"Study for 20 minutes",done:false},{text:"Do something that makes me happy",done:false}];
+render();
+</script>
+</body>
+  </html>
+  
